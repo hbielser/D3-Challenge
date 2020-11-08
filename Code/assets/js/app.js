@@ -18,34 +18,46 @@ var chartMargin = {
 var chartWidth = svgWidth - chartMargin.left - chartMargin.right;
 var chartHeight = svgHeight - chartMargin.top - chartMargin.bottom;
 
-// Identify output and set the dimensions
+// Create SVG container
 var svg = d3.select("#scatter")
   .append("svg")
     .attr("height", svgHeight)
     .attr("width", svgWidth)
-  .append("g")
-    .attr("transform",
-        "translate(" + chartMargin.left + "," + chartMargin.top + ")");
 
+// shift everything over by the margins
+var chartGroup = svg.append("g")
+    .attr("transform",
+        `translate(${chartMargin.left}, ${chartMargin.top})`);
 
 // load data
 d3.csv("assets/data/data.csv").then(function(stateData) {
     // print the data
     console.log(stateData);
 
+    //cast poverty values to numbers
+    stateData.forEach(function(data) {
+        data.poverty = +data.poverty
+        // console.log(data.poverty)
+    });
+ 
+    //cast age values to numbers
+    stateData.forEach(function(data) {
+        data.age = +data.age
+    });
+
     // https://www.d3-graph-gallery.com/graph/scatter_basic.html
     // add X axis
-    var x = d3.scaleBand()
-        .domain(stateData.poverty)
-        .range([0, chartWidth]);
+    var x = d3.scaleLinear()
+        .domain(d3.extent(stateData, data => data.poverty))
+        .range([0, chartWidth])
     var xAxis = svg.append("g")
         .attr("transform", "translate(0," + chartHeight + ")")
         .call(d3.axisBottom(x));
 
     // Add Y axis
     var y = d3.scaleLinear()
-        .domain([0,d3.max(stateData.age)])
-        .range([ chartHeight, 0]);
+    .domain([d3.min(stateData, data => data.age),d3.max(stateData, data => data.age)])
+    .range([ chartHeight, 0]);
     svg.append("g")
         .call(d3.axisLeft(y));
 
@@ -55,10 +67,9 @@ d3.csv("assets/data/data.csv").then(function(stateData) {
     .data(stateData)
     .enter()
     .append("circle")
-        .attr("cx", function (d) { return x(d.poverty); } )
-        .attr("cy", function (d) { return y(d.age); } )
+        .attr("cx", function (d) { return x(parseInt(d.poverty)); } )
+        .attr("cy", function (d) { return y(parseInt(d.age)); } )
         .attr("r", 10)
-        // .style("stroke", "0000")
         .style("fill", "0000")
         .style("opacity", 0.25)
 
