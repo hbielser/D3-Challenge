@@ -34,10 +34,9 @@ d3.csv("assets/data/data.csv").then(function(stateData) {
     // print the data
     console.log(stateData);
 
- 
     //cast age values to numbers
     stateData.forEach(function(data) {
-        data.age = +data.age; 
+        data.healthcare = +data.healthcare; 
         data.poverty = +data.poverty;
     });
 
@@ -58,14 +57,14 @@ d3.csv("assets/data/data.csv").then(function(stateData) {
 
 
     // Add Y axis
-    minAge = d3.min(stateData, data => data.age)
-    console.log(minAge)
+    minHealthcare = d3.min(stateData, data => data.healthcare)
+    console.log(minHealthcare)
 
-    maxAge = d3.max(stateData, data => data.age)
-    console.log(maxAge)
+    maxHealthcare = d3.max(stateData, data => data.healthcare)
+    console.log(maxHealthcare)
 
     var y = d3.scaleLinear()
-    .domain([minAge * .8 , maxAge * 1.1])
+    .domain([minHealthcare * .8 , maxHealthcare * 1.1])
     .range([ chartHeight, 0]);
     chartGroup.append("g")
         .call(d3.axisLeft(y));
@@ -76,7 +75,7 @@ d3.csv("assets/data/data.csv").then(function(stateData) {
         .enter()
         .append("circle")
             .attr("cx", d => x(d.poverty))
-            .attr("cy", d => y(d.age))
+            .attr("cy", d => y(d.healthcare))
             .attr("r", "12")
             .attr("font-weight", "bold")
             .style("fill", "lightblue")
@@ -88,13 +87,11 @@ d3.csv("assets/data/data.csv").then(function(stateData) {
         .append("text")
             .attr("font-size", "10px")
             .attr("x", d => x(d.poverty))
-            .attr("y", d => y(d.age))
+            .attr("y", d => y(d.healthcare))
             .text(d => d.abbr)
-            // .classed("stateText", True)
             .attr("text-anchor", "middle")
             .style("fill", "black")
             .classed("stateText", true)
-
 
     // y-axis labels
     chartGroup.append("text")
@@ -105,7 +102,7 @@ d3.csv("assets/data/data.csv").then(function(stateData) {
         .attr("value","property")
         .attr("class", "axisText")
         .attr("font-weight", "Bold")
-        .text("Age");
+        .text("Lacks Healthcare");
 
     // x-axis labels
     chartGroup.append("text")
@@ -114,11 +111,10 @@ d3.csv("assets/data/data.csv").then(function(stateData) {
         .text("Poverty %")
         .attr("font-weight", "Bold");
 
-        
     var toolTip = d3.tip()
         .attr("class", "tooltip d3-tip")
-        .offset([40, 20])
-        .html(function (d) {return(`${d.abbr}<br>${d.poverty}<br>${d.age}`)})
+        .offset([80, -60])
+        .html(function (d) {return(`${d.abbr}<br>Poverty: ${d.poverty}%<br>Lacks Healthcare: ${d.healthcare}`)})
 
     markerGroup.call(toolTip)
     markerGroup.on("mouseover", function (d) {toolTip.show(d, this),attr("fill-color", "cream")})
